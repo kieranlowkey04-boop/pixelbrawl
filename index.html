@@ -64,10 +64,14 @@ canvas{touch-action:none;-webkit-user-select:none;user-select:none}
 #tm{top:max(8px,env(safe-area-inset-top));right:8px;gap:6px}
 .tb{position:absolute;width:56px;height:56px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,.55);background:rgba(0,0,0,.55);color:#fff;font:9px 'Press Start 2P',monospace;pointer-events:auto;touch-action:none;border-radius:50%;text-align:center}
 .tb.dn{background:#ffd60a;color:#000;border-color:#fff}
+#tc.joy #lp .tb{display:none}
+#tc:not(.joy) #js{display:none}
+#js{position:absolute;left:0;top:0;width:168px;height:168px;border-radius:50%;border:3px solid rgba(255,255,255,.4);background:rgba(0,0,0,.45);pointer-events:auto;touch-action:none;box-sizing:border-box}
+#jk{position:absolute;left:52px;top:52px;width:64px;height:64px;border-radius:50%;background:rgba(255,214,10,.85);border:3px solid #fff;box-sizing:border-box;pointer-events:none}
 #tm .tb{position:static;width:auto;height:32px;padding:0 10px;border-radius:0;font-size:8px}
 </style></head><body><canvas id="c" width="480" height="270"></canvas>
 <div id="tm"><div class="tb" data-c="KeyP">PAUSE</div><div class="tb" data-c="Escape">MENU</div></div>
-<div id="tc"><div class="pad"><div class="tb" data-k="u" style="left:56px;top:0">&#9650;</div><div class="tb" data-k="l" style="left:0;top:56px">&#9664;</div><div class="tb" data-k="r" style="left:112px;top:56px">&#9654;</div><div class="tb" data-k="d" style="left:56px;top:112px">&#9660;</div></div>
+<div id="tc"><div class="pad" id="lp"><div id="js"><div id="jk"></div></div><div class="tb" data-k="u" style="left:56px;top:0">&#9650;</div><div class="tb" data-k="l" style="left:0;top:56px">&#9664;</div><div class="tb" data-k="r" style="left:112px;top:56px">&#9654;</div><div class="tb" data-k="d" style="left:56px;top:112px">&#9660;</div></div>
 <div class="pad"><div class="tb" data-k="s" style="left:88px;top:18px;width:62px;height:62px">SPC</div><div class="tb" data-k="a" style="left:18px;top:104px;width:62px;height:62px">JAB</div><div class="tb" data-k="u" style="left:96px;top:96px;width:68px;height:68px">JUMP</div></div></div>
 <div id="ui"><div class="bx">
 <div class="sc" id="sc-join"><h1>JOIN GAME</h1>
@@ -85,6 +89,7 @@ canvas{touch-action:none;-webkit-user-select:none;user-select:none}
 <div class="rw"><button id="w-bk">CANCEL</button></div></div>
 <div class="sc" id="sc-set"><h1>SETTINGS</h1>
 <div class="kr"><span>TOUCH CONTROLS (MOBILE)</span><button id="s-tc"></button></div>
+<div class="kr"><span>MOVEMENT STYLE</span><button id="s-js"></button></div>
 <div class="kr"><span>SOUND</span><button id="s-snd"></button></div>
 <div class="kg" id="s-keys"></div>
 <p class="er" id="s-er"></p>
@@ -432,7 +437,7 @@ addEventListener('pagehide',()=>{try{if(NET.m==1)bc({t:'bye'});else if(NET.m==2&
 
 /* ---------- settings / keybinds / touch ---------- */
 const RESK=['Escape','KeyM','KeyP','Enter','Tab','MetaLeft','MetaRight','ContextMenu'],ACT=[['l','MOVE LEFT'],['r','MOVE RIGHT'],['u','JUMP / UP'],['d','CROUCH / DROP'],['a','JAB'],['s','SPECIAL']],BIND=[K1,K2];
-let CAP=null,TOUCH=(()=>{const v=store.get('pb_touch');return v?v=='1':!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)})();
+let JOY=store.get('pb_joy')!='0',CAP=null,TOUCH=(()=>{const v=store.get('pb_touch');return v?v=='1':!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)})();
 try{const j=JSON.parse(store.get('pb_keys')||'null');if(Array.isArray(j))BIND.forEach((o,i)=>{for(const a of BK){const v=j[i]&&j[i][a];if(typeof v=='string'&&/^[A-Za-z0-9]{1,20}$/.test(v))o[a]=v}})}catch(e){}
 const saveKeys=()=>store.set('pb_keys',JSON.stringify(BIND));
 function openSettings(){CAP=null;showSc('sc-set');renderSet()}
@@ -440,7 +445,7 @@ function renderSet(msg){const root=$('s-keys');root.textContent='';
 BIND.forEach((B,pi)=>{const col=document.createElement('div'),h=document.createElement('h2');h.textContent='PLAYER '+(pi+1)+' KEYS';col.appendChild(h);
 ACT.forEach(([a,n])=>{const r=document.createElement('div');r.className='kr';const l=document.createElement('span');l.textContent=n;const b=document.createElement('button'),cp=!!CAP&&CAP.p==pi&&CAP.a==a;
 b.textContent=cp?'PRESS A KEY...':kn(B[a]);if(cp)b.className='cap';b.onclick=()=>{CAP=cp?null:{p:pi,a};renderSet()};r.append(l,b);col.appendChild(r)});root.appendChild(col)});
-$('s-tc').textContent=TOUCH?'ON':'OFF';$('s-snd').textContent=mute?'OFF':'ON';say('s-er',msg||(CAP?'PRESS THE NEW KEY - ESC TO CANCEL':''))}
+$('s-tc').textContent=TOUCH?'ON':'OFF';$('s-js').textContent=JOY?'JOYSTICK':'D-PAD';$('s-snd').textContent=mute?'OFF':'ON';say('s-er',msg||(CAP?'PRESS THE NEW KEY - ESC TO CANCEL':''))}
 addEventListener('keydown',e=>{if(!CAP||!uiOn())return;e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;const c=e.code;
 if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
 if(c=='Escape'){CAP=null;return renderSet()}
@@ -449,6 +454,7 @@ const {p,a}=CAP,old=BIND[p][a];let msg='';
 BIND.forEach((B,pi)=>{for(const k of BK)if((pi!=p||k!=a)&&B[k]==c){B[k]=old;msg='SWAPPED WITH P'+(pi+1)+' '+ACT.find(x=>x[0]==k)[1]}});
 BIND[p][a]=c;CAP=null;saveKeys();renderSet(msg)},true);
 $('s-tc').onclick=()=>{TOUCH=!TOUCH;store.set('pb_touch',TOUCH?'1':'0');renderSet();updTouch()};
+$('s-js').onclick=()=>{JOY=!JOY;store.set('pb_joy',JOY?'1':'0');renderSet();updTouch()};
 $('s-snd').onclick=()=>{mute^=1;renderSet()};
 $('s-rs').onclick=()=>{BIND.forEach((B,i)=>Object.assign(B,DEF[i]));CAP=null;saveKeys();renderSet()};
 $('s-bk').onclick=()=>{CAP=null;toTitle()};
@@ -459,7 +465,18 @@ try{el.setPointerCapture(e.pointerId)}catch(x){}
 tmap[e.pointerId]={code,el};el.classList.add('dn');if(!K[code])P[code]=1;K[code]=1;TK[code]=(TK[code]|0)+1}
 function tUp(e){tRel(e.pointerId)}
 document.querySelectorAll('.tb').forEach(el=>{el.addEventListener('pointerdown',tDown);el.addEventListener('pointerup',tUp);el.addEventListener('pointercancel',tUp);el.addEventListener('contextmenu',e=>e.preventDefault())});
-let tOn=-1;function updTouch(){const on=TOUCH&&!uiOn()?1:0;if(on===tOn)return;tOn=on;$('tc').classList.toggle('on',!!on);$('tm').classList.toggle('on',!!on);if(!on)for(const id in tmap)tRel(id)}
+const jsE=$('js'),jkE=$('jk'),JS={};let jid=-1;
+function jset(a,on){if(!!JS[a]==on)return;JS[a]=on;const c=K1[a];if(on){if(!K[c])P[c]=1;K[c]=1;TK[c]=(TK[c]|0)+1}else{TK[c]=Math.max(0,(TK[c]|0)-1);K[c]=TK[c]>0?1:0}}
+function jmove(e){const r=jsE.getBoundingClientRect(),R=r.width/2;let dx=e.clientX-(r.left+R),dy=e.clientY-(r.top+R);
+jset('l',dx<-.3*R);jset('r',dx>.3*R);jset('u',dy<-.45*R);jset('d',dy>.45*R);
+const d=Math.hypot(dx,dy),m=R-32;if(d>m){dx*=m/d;dy*=m/d}jkE.style.transform='translate('+dx+'px,'+dy+'px)'}
+function jrel(){jid=-1;for(const a of['l','r','u','d'])jset(a,false);jkE.style.transform=''}
+jsE.addEventListener('pointerdown',e=>{e.preventDefault();initAC();if(jid>=0)return;jid=e.pointerId;try{jsE.setPointerCapture(jid)}catch(x){}jmove(e)});
+jsE.addEventListener('pointermove',e=>{if(e.pointerId==jid)jmove(e)});
+jsE.addEventListener('pointerup',e=>{if(e.pointerId==jid)jrel()});
+jsE.addEventListener('pointercancel',e=>{if(e.pointerId==jid)jrel()});
+jsE.addEventListener('contextmenu',e=>e.preventDefault());
+let tOn=-1;function updTouch(){const jc=$('tc').classList.contains('joy');if(jc!==JOY){if(jid>=0)jrel();$('tc').classList.toggle('joy',JOY)}const on=TOUCH&&!uiOn()?1:0;if(on===tOn)return;tOn=on;if(!on&&jid>=0)jrel();$('tc').classList.toggle('on',!!on);$('tm').classList.toggle('on',!!on);if(!on)for(const id in tmap)tRel(id)}
 
 /* ---------- main loop (also ticks from a worker so a hidden/background tab keeps simulating) ---------- */
 let last=performance.now(),acc=0;
